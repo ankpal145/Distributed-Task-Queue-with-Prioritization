@@ -5,9 +5,12 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "code-changes" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "code-changes" ]
+
+permissions:
+  contents: read
 
 jobs:
 
@@ -19,10 +22,13 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version: '1.23'
+
+    - name: Download dependencies
+      run: go mod download
 
     - name: Build
-      run: go build -v ./...
+      run: go build -o bin/taskqueue.exe ./cmd
 
     - name: Test
       run: go test -v ./...

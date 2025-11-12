@@ -2,26 +2,27 @@ name: Makefile CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "code-changes" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "code-changes" ]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: configure
-      run: ./configure
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
 
-    - name: Install dependencies
-      run: make
+    - name: Build
+      run: make build
 
-    - name: Run check
-      run: make check
-
-    - name: Run distcheck
-      run: make distcheck
+    - name: Test
+      run: make test
