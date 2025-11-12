@@ -10,6 +10,9 @@ on:
       - main
       - code-changes
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
