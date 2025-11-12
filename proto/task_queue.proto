@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package taskqueue;
+
+option go_package = "github.com/ankurpal/distributed-task-queue/proto;proto";
+
+// TaskQueueService defines the gRPC API for the task queue
+service TaskQueueService {
+  // SubmitTask submits a new task to the queue
+  rpc SubmitTask(SubmitTaskRequest) returns (TaskResponse);
+  
+  // GetTaskStatus retrieves the status of a task
+  rpc GetTaskStatus(GetTaskStatusRequest) returns (TaskResponse);
+  
+  // CancelTask cancels a pending task
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+  
+  // StreamTasks streams task updates in real-time
+  rpc StreamTasks(StreamTasksRequest) returns (stream TaskUpdate);
+  
+  // RegisterWorker registers a new worker
+  rpc RegisterWorker(RegisterWorkerRequest) returns (WorkerResponse);
+  
+  // UpdateHeartbeat updates worker heartbeat
+  rpc UpdateHeartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+}
+
+// Priority levels for tasks
+enum Priority {
+  LOW = 0;
+  NORMAL = 1;
+  HIGH = 2;
+  CRITICAL = 3;
+}
+
+// Task status
+enum TaskStatus {
+  PENDING = 0;
+  PROCESSING = 1;
+  COMPLETED = 2;
+  FAILED = 3;
+  DEAD = 4;
+  CANCELLED = 5;
+}
+
+// SubmitTaskRequest represents a task submission request
+message SubmitTaskRequest {
+  string type = 1;
+  Priority priority = 2;
+  bytes payload = 3;
+  int32 max_retries = 4;
+  int64 timeout_ms = 5;
+  int64 scheduled_at = 6;
+  map<string, string> metadata = 7;
+}
+
+// TaskResponse represents a task response
+message TaskResponse {
+  string id = 1;
+  string type = 2;
+  Priority priority = 3;
+  bytes payload = 4;
+  TaskStatus status = 5;
+  bytes result = 6;
+  string error = 7;
+  int32 retry_count = 8;
+  int32 max_retries = 9;
+  int64 created_at = 10;
+  int64 scheduled_at = 11;
+  int64 started_at = 12;
+  int64 completed_at = 13;
+  int64 timeout_ms = 14;
+  string worker_id = 15;
+  map<string, string> metadata = 16;
+}
+
+// GetTaskStatusRequest requests task status
+message GetTaskStatusRequest {
+  string task_id = 1;
+}
+
+// CancelTaskRequest cancels a task
+message CancelTaskRequest {
+  string task_id = 1;
+}
+
+// CancelTaskResponse confirms task cancellation
+message CancelTaskResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// StreamTasksRequest requests task stream
+message StreamTasksRequest {
+  repeated string task_ids = 1;
+  repeated TaskStatus statuses = 2;
+}
+
+// TaskUpdate provides real-time task updates
+message TaskUpdate {
+  string task_id = 1;
+  TaskStatus status = 2;
+  int64 timestamp = 3;
+}
+
+// RegisterWorkerRequest registers a worker
+message RegisterWorkerRequest {
+  string name = 1;
+  repeated string queues = 2;
+  int32 concurrency = 3;
+  map<string, string> metadata = 4;
+}
+
+// WorkerResponse represents a worker response
+message WorkerResponse {
+  string id = 1;
+  string name = 2;
+  repeated string queues = 3;
+  int32 concurrency = 4;
+  int64 registered_at = 5;
+}
+
+// HeartbeatRequest sends worker heartbeat
+message HeartbeatRequest {
+  string worker_id = 1;
+  int64 timestamp = 2;
+}
+
+// HeartbeatResponse confirms heartbeat
+message HeartbeatResponse {
+  bool success = 1;
+  int64 next_heartbeat = 2;
+}
+
