@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-      - code-changes # Add your branch name
   pull_request:
     branches:
       - main
-      - code-changes
 
 permissions:
   contents: read
